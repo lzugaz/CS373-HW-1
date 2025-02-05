@@ -34,9 +34,9 @@ class KNearestNeighbor:
         """
 
         # >>> YOUR CODE HERE >>>
-        self.k = ...
-        self.X_train = ...
-        self.y_train = ...
+        self.k = k
+        self.X_train = None
+        self.y_train = None
         # <<< END OF YOUR CODE <<<
 
     def fit(self, X_train: np.ndarray, y_train: np.ndarray) -> None:
@@ -69,8 +69,8 @@ class KNearestNeighbor:
         assert self.k <= X_train.shape[0], "The number of nearest neighbors cannot be greater than the number of training data." # type: ignore
 
         # >>> YOUR CODE HERE >>>
-        self.X_train = ...
-        self.y_train = ...
+        self.X_train = X_train
+        self.y_train = y_train
         # <<< END OF YOUR CODE <<<
 
 
@@ -88,10 +88,10 @@ class KNearestNeighbor:
         """
 
         # >>> YOUR CODE HERE >>>
-        differences = ...
-        powered_differences = ...
-        sum_of_powers = ...
-        distances = ...
+        differences = np.abs(self.X_train - x)
+        powered_differences = pow(differences, p)
+        sum_of_powers = np.sum(powered_differences, axis=1)
+        distances = pow(sum_of_powers, 1/p)
         # <<< END OF YOUR CODE <<<
         return distances
     
