@@ -116,7 +116,8 @@ class KNearestNeighbor:
         """
 
         # >>> YOUR CODE HERE >>>
-        top_k = ...
+        sorted = np.argsort(distance)
+        top_k = sorted[:self.k]
         # <<< END OF YOUR CODE <<<
 
         return top_k
@@ -156,12 +157,16 @@ class KNearestNeighbor:
         y_predict = np.zeros(X_predict.shape[0], dtype=self.y_train.dtype)
 
         # >>> YOUR CODE HERE >>>
-        distance = ...
-        top_k = ...
-        ...
+        differences = np.abs(self.X_train - X_predict)
+        powered_differences = pow(differences, p)
+        sum_of_powers = np.sum(powered_differences, axis=1)
+        distance = pow(sum_of_powers, 1/p)
+        top_k = self.get_top_k(distance)
+        top_k_labels = self.y_train[top_k]
+        y_predict = np.array([int(np.argmax(np.bincount(top_k_labels))) for i in range(X_predict.shape[0])])
         # <<< END OF YOUR CODE <<<
-
-
+   
+        
         return y_predict
     
 if __name__ == "__main__":
