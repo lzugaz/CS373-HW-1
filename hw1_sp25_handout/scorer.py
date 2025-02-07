@@ -43,9 +43,10 @@ class Scorer:
         
 
         # >>> YOUR CODE HERE >>>
-        self.type = ...
-        self.class_labels = ...
-        self.alpha = ...
+        self.type = type
+        self.class_labels = sorted(set(class_labels))  # Use set() to extract unique values
+
+        self.alpha = alpha
         # <<< END OF YOUR CODE <<<
 
     def compute_class_probabilities(self, labels: ArrayLike) -> Dict[Any, float]:
@@ -74,7 +75,13 @@ class Scorer:
         class_probabilities = {}
 
         # >>> YOUR CODE HERE >>>
-        ...
+        label_count  = collections.Counter(labels)
+        total_count = sum(label_count.values())
+        number_of_classes = len(self.class_labels)  
+        for i in self.class_labels:
+            
+            class_probabilities[i] = (label_count[i] + self.alpha) / (total_count + (number_of_classes * self.alpha))
+
         # <<< END OF YOUR CODE <<<
 
 
@@ -139,7 +146,12 @@ class Scorer:
         #build contigency table 
         for value in unique_values:
             # >>> YOUR CODE HERE >>>
-            ...
+            row = []
+            subset_lables = labels[data[:, split_attribute] == value]
+            for label in label_classes:
+                row.append(np.sum(subset_lables == label))
+            contingency_table.append(row)
+        contingency_table = np.array(contingency_table)
             # <<< END OF YOUR CODE <<<
     
         chi2, p, dof, expected = chi2_contingency(contingency_table)
@@ -205,8 +217,8 @@ class Scorer:
         """
 
         # >>> YOUR CODE HERE >>>
-        data_subset = ...
-        labels_subset = ...
+        data_subset = np.array([row for row in data if row[split_attribute] == split_value])
+        labels_subset = np.array([label for i, label in enumerate(labels) if data[i][split_attribute] == split_value])
         # <<< END OF YOUR CODE <<<
 
         return data_subset, labels_subset
@@ -267,12 +279,14 @@ class Scorer:
             >>> scorer.information_score(y)
             0.9544340...
         """
-
+      
         class_probabilities = self.compute_class_probabilities(labels)
         
         entropy = 0
         # >>> YOUR CODE HERE >>>
-        ...
+        probs = np.array(list(class_probabilities.values()))
+        entropy = (-np.sum(probs * np.log2(probs)))
+
         # <<< END OF YOUR CODE <<<
 
         return entropy
@@ -299,7 +313,8 @@ class Scorer:
         
         gini = 0
         # >>> YOUR CODE HERE >>>
-        ...
+        probs = np.array(list(class_probabilities.values()))
+        gini = 1 - np.sum(probs ** 2)
         # <<< END OF YOUR CODE <<<
         
         return gini
@@ -339,12 +354,27 @@ class Scorer:
             >>> [scorer.information_gain(X, y, i) for i in range(X.shape[1])]
             [0.03474..., 0.07816..., 0.06497...]
         """
-
         extropy_before = self.information_score(labels)
         extropy_after = 0
         # >>> YOUR CODE HERE >>>
-        information_gain = ...
+        total = len(labels)
+        unique_values = np.unique(data[:, split_attribute])
+
+
+        for value in unique_values:
+            data_subset, labels_subset = self.subset_data(data, labels, split_attribute, value)
+           
+
+            weight = len(labels_subset) / total
+            entropy_subset = self.information_score(labels_subset)
+            if entropy_subset == 0:
+                return 0
+            
+            extropy_after += (weight * entropy_subset)
+
+        information_gain = extropy_before - extropy_after
         # <<< END OF YOUR CODE <<<
+
 
         return information_gain
 
@@ -387,8 +417,15 @@ class Scorer:
         gini_before = self.score(labels)
         gini_after = 0
         # >>> YOUR CODE HERE >>>
-        gini_gain = ...
+        unique_values, counts = np.unique(data[:, split_attribute], return_counts=True)
+
+        for value, count in zip(unique_values, counts):
+            subset_labels = labels[data[:, split_attribute] == value] 
+            gini_after += (count / len(labels)) * self.gini_score(subset_labels)
+
+        gini_gain = gini_before - gini_after
         # <<< END OF YOUR CODE <<<
+
         return gini_gain
 
     def __repr__(self) -> str:
