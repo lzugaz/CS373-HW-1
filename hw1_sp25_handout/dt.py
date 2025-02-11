@@ -92,7 +92,7 @@ class Leaf(Node):
                    [0.7, 0.3]])
         """
         # >>> YOUR CODE HERE >>>
-        probabilities = ...
+        probabilities = np.array([list(self.class_probabilities.values())])
         # <<< END OF YOUR CODE <<<
 
         return np.repeat(probabilities, len(X), axis=0)
@@ -438,7 +438,6 @@ if __name__ == "__main__":
     from utils import print_green, print_red
 
     # Clear the terminal
-    os.system('cls' if os.name == 'nt' else 'clear')
 
     # Run the doctests. If all tests pass, print "All tests passed!"
     # You may ignore PYDEV DEBUGGER WARNINGS that appear in the console.

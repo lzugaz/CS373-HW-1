@@ -44,7 +44,7 @@ class Scorer:
 
         # >>> YOUR CODE HERE >>>
         self.type = type
-        self.class_labels = sorted(set(class_labels))  # Use set() to extract unique values
+        self.class_labels = sorted(set(class_labels))  
 
         self.alpha = alpha
         # <<< END OF YOUR CODE <<<
